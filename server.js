@@ -7,25 +7,37 @@ const port = process.env.PORT || 3001; //INITIALIZE THE SERVER CONNECTION PORT
 // BY DEFAULT EXPRESS JS NOT SUPPORT JSON SO NEED TO USE A MIDDLEWARE
 app.use(express.json()); //THIS IS EXPRESS MIDDLEWARE TO ALLOW THE USE OF JSON
 
-// API ROUTES
+const apiRoutes = express.Router(); //CREATING ROUTE GROUPS USING EXPRESS ROUTE FUNCTION
+app.use("/api", apiRoutes);
 
+const Products = require("./model/products.model");
+
+// API ROUTES
 // GET ROUTE
-app.get("/products", function (req, res) {
+
+apiRoutes.get("/", function (req, res) {
+  console.log("Someone run the base url");
   res.status(200).json({
-    message: "workking",
+    message: "Api is running",
   });
 });
 
+// IMPORT PRODUCT CONTROLLER
+const productController = require("./controller/productController");
+// GET ROUTE
+apiRoutes.get("/products", productController.getProducts);
+// FIND SINGLE PRODUCT
+apiRoutes.get("/products/:id", productController.getSingleproducts);
 // POST ROUTE
-app.post("/products", function (req, res) {
-  res.status(200).json(req.body);
-});
+apiRoutes.post("/products", productController.addProducts);
+// UPDATE/PUT ROUTE
+apiRoutes.put("/products/:id", productController.updateProducts);
+// DELETE ROUTE
+apiRoutes.delete("/products/:id", productController.deleteProducts);
 
 // connecting to the mongo database using connection string
 mongoose
-  .connect(
-    "mongodb+srv://root:PvP4I0yv6mWHY1s1@learning.tcu651f.mongodb.net/expressjs-learning?retryWrites=true&w=majority&appName=learning" // THIS IS THE CONNECTION STRING FROM THE MONGO DB
-  )
+  .connect(process.env.MONGO_CONNECTION) // THIS IS THE CONNECTION STRING FROM THE MONGO DB
   .then(() => {
     // IF CONNECTION IS WORKING PROPERLY THEN WE WILL GO TO THE NEXT STEP OF RUNNING THE SERVER
     app.listen(port, () => {
